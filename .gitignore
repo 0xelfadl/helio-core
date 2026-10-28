@@ -7,6 +7,9 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
+apps/api/generated/
+
 # test output
 coverage/
 

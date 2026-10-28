@@ -31,6 +31,7 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     ports:
       - "127.0.0.1:3001:3001"
     depends_on:
