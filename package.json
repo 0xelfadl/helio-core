@@ -3,10 +3,11 @@
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=24 <25"
   },
   "scripts": {
      "build:shared": "pnpm --filter @helio/shared build",
-     "typecheck": "pnpm build:shared && pnpm -r typecheck"
+     "codegen": "pnpm build:shared && pnpm --filter @helio/api db:generate",
+     "typecheck": "pnpm codegen && pnpm -r typecheck"
   }
 }

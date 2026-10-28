@@ -31,6 +31,7 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     ports:
       - "127.0.0.1:3001:3001"
     depends_on:
@@ -38,6 +39,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   web:
     build:
@@ -47,6 +50,19 @@ services:
       - "127.0.0.1:3000:3000"
     depends_on:
       - api
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    command: ["pnpm", "--filter", "@helio/api", "db:deploy"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   pgdata:
