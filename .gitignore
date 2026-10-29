@@ -8,7 +8,7 @@ dist/
 next-env.d.ts
 
 # prisma
-apps/api/generated/
+apps/api/src/generated/
 
 # test output
 coverage/

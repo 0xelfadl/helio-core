@@ -19,3 +19,7 @@ for this info we should think for other method
 # where i could to add the email lowercase
 maybe i'am thinking to add it in validation middlware to make every email with lowercase format !!
 
+# using export module 
+we use prisma module for only the module will read and write from the database 
+
+
