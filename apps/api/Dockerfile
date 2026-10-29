@@ -13,6 +13,7 @@ RUN pnpm install --frozen-lockfile --filter "@helio/api..."
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/api apps/api
+RUN pnpm --filter @helio/api db:generate
 RUN pnpm --filter @helio/shared build && pnpm --filter @helio/api build
 RUN pnpm --filter @helio/api deploy --prod /out
 
