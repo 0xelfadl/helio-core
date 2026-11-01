@@ -22,4 +22,6 @@ maybe i'am thinking to add it in validation middlware to make every email with l
 # using export module 
 we use prisma module for only the module will read and write from the database 
 
+# every request rejected 
+mybe could be fully the logs when an attack could be happen mybe we will think to use rate limiting to prevent this kind of this attack 
 
