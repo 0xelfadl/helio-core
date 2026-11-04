@@ -37,6 +37,12 @@ services:
       JWT_AUDIENCE: helio-api
     ports:
       - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,7 +58,8 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
-      - api
+       api:
+          condition: service_healthy
 
   migrate:
     build:

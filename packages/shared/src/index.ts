@@ -1,1 +1,1 @@
-export{};
+export type { ApiErrorBody } from './api-error.js';
