@@ -1,11 +1,5 @@
 import { AuthPrincipal,ROLES ,Role } from "./auth.types.js";
-
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function isUuid(value: unknown): value is string {
-  return typeof value === 'string' && UUID_PATTERN.test(value);
-}
+import { isUuid } from "../common/validation/uuid.js"
 
 function isRole(value: unknown): value is Role {
   return (
