@@ -5,29 +5,31 @@ const TICKET_STATUSES = ['open', 'pending', 'solved', 'closed'] as const;
 const TICKET_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 
 // type ticket status
-export type TicketStatus = (typeof TICKET_STATUSES)[number]; 
+export type TicketStatus = (typeof TICKET_STATUSES)[number];
 // type ticket priority
 export type TicketPriority = (typeof TICKET_PRIORITIES)[number];
-// type to sort them 
+// type to sort them
 export type SortKey = 'createdAt_desc' | 'createdAt_asc' | 'updatedAt_desc';
 // assigne filter
-export type AssigneeFilter = | { kind: 'me'} | { kind: 'unassigned'} | { kind: 'user'; userId:string };
-// how the list of tickets should look like 
+export type AssigneeFilter =
+  { kind: 'me' } | { kind: 'unassigned' } | { kind: 'user'; userId: string };
+// how the list of tickets should look like
 export interface ListTicketsQuery {
-    statuses: TicketStatus[];
-    priorities: TicketPriority[] | null;
-    assignee: AssigneeFilter | null;
-    sort: SortKey;
-    limit: number;
-    cursor: string | null;
+  statuses: TicketStatus[];
+  priorities: TicketPriority[] | null;
+  assignee: AssigneeFilter | null;
+  sort: SortKey;
+  limit: number;
+  cursor: string | null;
 }
-// if we have an error 
+// if we have an error
 export interface QueryError {
-    field: string;
-    reason: string;
+  field: string;
+  reason: string;
 }
-// the type that the parser could take 
-export type ParseResult = | { ok: true ; value: ListTicketsQuery } | { ok: false ; error: QueryError };
+// the type that the parser could take
+export type ParseResult =
+  { ok: true; value: ListTicketsQuery } | { ok: false; error: QueryError };
 
 export const DEFAULT_LIMIT = 25;
 export const MAX_LIMIT = 100;
@@ -47,32 +49,36 @@ const SORT_KEY_BY_PARAM: Record<SortParam, SortKey> = {
 const SINGLE_VALUE = { error: 'must be provided once, as a single value' };
 
 function csvOf<T extends string>(allowed: readonly T[]) {
-    return z.string(SINGLE_VALUE).transform((raw,ctx) =>{
-        const parts = raw.split(',');
-        const isValid = parts.every((part) => (allowed as readonly string []).includes(part));
-        if(!isValid){
-            ctx.issues.push({
-                code: 'custom',
-                message: `must be a comma-separated list of: ${allowed.join(', ')}`,
-                input: raw,
-            });
-            return z.NEVER
-        }
-        return allowed.filter((value) => parts.includes(value));
-    });
+  return z.string(SINGLE_VALUE).transform((raw, ctx) => {
+    const parts = raw.split(',');
+    const isValid = parts.every((part) =>
+      (allowed as readonly string[]).includes(part),
+    );
+    if (!isValid) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `must be a comma-separated list of: ${allowed.join(', ')}`,
+        input: raw,
+      });
+      return z.NEVER;
+    }
+    return allowed.filter((value) => parts.includes(value));
+  });
 }
 
-const assigneeSchema = z.string(SINGLE_VALUE).transform((raw, ctx): AssigneeFilter => {
-  if (raw === 'me') return { kind: 'me' };
-  if (raw === 'unassigned') return { kind: 'unassigned' };
-  if (isUuid(raw)) return { kind: 'user', userId: raw.toLowerCase() };
-  ctx.issues.push({
-    code: 'custom',
-    message: 'must be "me", "unassigned" or a user id',
-    input: raw,
+const assigneeSchema = z
+  .string(SINGLE_VALUE)
+  .transform((raw, ctx): AssigneeFilter => {
+    if (raw === 'me') return { kind: 'me' };
+    if (raw === 'unassigned') return { kind: 'unassigned' };
+    if (isUuid(raw)) return { kind: 'user', userId: raw.toLowerCase() };
+    ctx.issues.push({
+      code: 'custom',
+      message: 'must be "me", "unassigned" or a user id',
+      input: raw,
+    });
+    return z.NEVER;
   });
-  return z.NEVER;
-});
 
 const sortSchema = z
   .enum(SORT_PARAMS, { error: `must be one of: ${SORT_PARAMS.join(', ')}` })
@@ -80,9 +86,13 @@ const sortSchema = z
 
 const limitSchema = z
   .string(SINGLE_VALUE)
-  .regex(/^[1-9]\d{0,2}$/, { error: `must be an integer from 1 to ${MAX_LIMIT}` })
+  .regex(/^[1-9]\d{0,2}$/, {
+    error: `must be an integer from 1 to ${MAX_LIMIT}`,
+  })
   .transform(Number)
-  .refine((n) => n <= MAX_LIMIT, { error: `must be an integer from 1 to ${MAX_LIMIT}` });
+  .refine((n) => n <= MAX_LIMIT, {
+    error: `must be an integer from 1 to ${MAX_LIMIT}`,
+  });
 
 const cursorSchema = z
   .string(SINGLE_VALUE)
@@ -104,7 +114,10 @@ function toQueryError(error: z.ZodError): QueryError {
 
   if (issue.code === 'unrecognized_keys') {
     const key = issue.keys[0] ?? 'query';
-    return { field: key.slice(0, MAX_ECHOED_FIELD_LENGTH), reason: 'is not a supported parameter' };
+    return {
+      field: key.slice(0, MAX_ECHOED_FIELD_LENGTH),
+      reason: 'is not a supported parameter',
+    };
   }
 
   const field = issue.path[0];
@@ -116,19 +129,19 @@ function toQueryError(error: z.ZodError): QueryError {
 
 // function that take the raw and what return
 export function parseListTicketsQuery(raw: unknown): ParseResult {
-    const result = querySchema.safeParse(raw);
-    if(!result.success) return { ok:false, error:toQueryError(result.error)};
+  const result = querySchema.safeParse(raw);
+  if (!result.success) return { ok: false, error: toQueryError(result.error) };
 
-    const q= result.data;
-    return {
-        ok:true,
-        value: {
-           statuses: q.status ?? [...DEFAULT_STATUSES],
-           priorities: q.priority ?? null,
-           assignee: q.assignee ?? null,
-           sort: q.sort ?? DEFAULT_SORT,
-           limit: q.limit ?? DEFAULT_LIMIT,
-           cursor: q.cursor ?? null,
-        },
-    };
+  const q = result.data;
+  return {
+    ok: true,
+    value: {
+      statuses: q.status ?? [...DEFAULT_STATUSES],
+      priorities: q.priority ?? null,
+      assignee: q.assignee ?? null,
+      sort: q.sort ?? DEFAULT_SORT,
+      limit: q.limit ?? DEFAULT_LIMIT,
+      cursor: q.cursor ?? null,
+    },
+  };
 }
