@@ -6,8 +6,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
-     "build:shared": "pnpm --filter @helio/shared build",
-     "codegen": "pnpm build:shared && pnpm --filter @helio/api db:generate",
-     "typecheck": "pnpm codegen && pnpm -r typecheck"
+    "build:shared": "pnpm --filter @helio/shared build",
+    "codegen": "pnpm build:shared && pnpm --filter @helio/api db:generate",
+    "typecheck": "pnpm codegen && pnpm -r typecheck"
   }
 }

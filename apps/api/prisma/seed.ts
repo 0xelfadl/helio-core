@@ -24,7 +24,7 @@ const LOCAL_DB_HOSTS = new Set(['localhost', '127.0.0.1', 'postgres']);
 const MIN_STAR_AGENT_URGENT_OPEN = 26;
 const MIN_LARGEST_TIE_GROUP = 26;
 // Guards : refuse the prod and prod database
-// the duplication of requireEnv it's normal rigth now but if we add it third time maybe we should things use utils/env.ts file 
+// the duplication of requireEnv it's normal rigth now but if we add it third time maybe we should things use utils/env.ts file
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env var: ${name}`);
@@ -39,7 +39,7 @@ function assertSafeTarget(databaseUrl: string): void {
     throw new Error(`Refusing to seed a non-local database (host: ${host})`);
   }
 }
-// Build : all the tenants that we alerady build 
+// Build : all the tenants that we alerady build
 function buildDataset() {
   const faker = new Faker({ locale: [en] });
   faker.seed(SEED);
@@ -53,10 +53,14 @@ function buildDataset() {
     const org = buildOrganization(ctx, spec);
     const tenantUsers = buildUsers(ctx, spec, org.id);
     organizations.push(org);
-    for (const user of [tenantUsers.admin, ...tenantUsers.agents, ...tenantUsers.requesters]) {
+    for (const user of [
+      tenantUsers.admin,
+      ...tenantUsers.agents,
+      ...tenantUsers.requesters,
+    ]) {
       users.push(user);
     }
-    // you are asking why i' use for instead of use the whole function inside tickets.push man we are use 200_000 tickets and this things will crash for sure js don't support all this arguments in one shot , neaither you don't support that :) 
+    // you are asking why i' use for instead of use the whole function inside tickets.push man we are use 200_000 tickets and this things will crash for sure js don't support all this arguments in one shot , neaither you don't support that :)
     for (const ticket of buildTickets(ctx, spec, org.id, tenantUsers)) {
       tickets.push(ticket);
     }
@@ -65,7 +69,7 @@ function buildDataset() {
   tickets.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   return { organizations, users, tickets };
 }
-// Insert: orgs and users and tickets in batches of 5000 
+// Insert: orgs and users and tickets in batches of 5000
 async function insertInBatches<T>(
   label: string,
   rows: readonly T[],
@@ -76,8 +80,11 @@ async function insertInBatches<T>(
   }
   console.log(`  inserted ${rows.length.toLocaleString()} ${label}`);
 }
-// verify : query and let's test 
-async function verifyPreconditions(prisma: PrismaClient, users: SeedUser[]): Promise<void> {
+// verify : query and let's test
+async function verifyPreconditions(
+  prisma: PrismaClient,
+  users: SeedUser[],
+): Promise<void> {
   const star = users.find((u) => u.email === 'agent1@acme.test');
   if (!star) throw new Error('Known account agent1@acme.test is missing');
 
@@ -99,13 +106,19 @@ async function verifyPreconditions(prisma: PrismaClient, users: SeedUser[]): Pro
     LIMIT 1`;
 
   console.log(`  agent1@acme.test urgent open+pending: ${starUrgentOpen}`);
-  console.log(`  largest group of identical created_at in acme: ${largest?.ties ?? 0}`);
+  console.log(
+    `  largest group of identical created_at in acme: ${largest?.ties ?? 0}`,
+  );
 
   if (starUrgentOpen < MIN_STAR_AGENT_URGENT_OPEN) {
-    throw new Error(`E2E precondition failed: agent1 has only ${starUrgentOpen} urgent open tickets`);
+    throw new Error(
+      `E2E precondition failed: agent1 has only ${starUrgentOpen} urgent open tickets`,
+    );
   }
   if ((largest?.ties ?? 0) < MIN_LARGEST_TIE_GROUP) {
-    throw new Error('Pagination precondition failed: no tie group larger than a page');
+    throw new Error(
+      'Pagination precondition failed: no tie group larger than a page',
+    );
   }
 }
 
@@ -123,9 +136,15 @@ async function main(): Promise<void> {
 
   try {
     await prisma.$executeRaw`TRUNCATE TABLE tickets, users, organizations`;
-    await insertInBatches('organizations', organizations, (data) => prisma.organization.createMany({ data }));
-    await insertInBatches('users', users, (data) => prisma.user.createMany({ data }));
-    await insertInBatches('tickets', tickets, (data) => prisma.ticket.createMany({ data }));
+    await insertInBatches('organizations', organizations, (data) =>
+      prisma.organization.createMany({ data }),
+    );
+    await insertInBatches('users', users, (data) =>
+      prisma.user.createMany({ data }),
+    );
+    await insertInBatches('tickets', tickets, (data) =>
+      prisma.ticket.createMany({ data }),
+    );
     await prisma.$executeRaw`ANALYZE organizations, users, tickets`;
     console.log('Verifying preconditions:');
     await verifyPreconditions(prisma, users);
@@ -133,7 +152,9 @@ async function main(): Promise<void> {
     await prisma.$disconnect();
   }
 
-  console.log(`Seed finished in ${((Date.now() - startedAt) / 1000).toFixed(1)} s`);
+  console.log(
+    `Seed finished in ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
+  );
 }
 
 main().catch((error: unknown) => {

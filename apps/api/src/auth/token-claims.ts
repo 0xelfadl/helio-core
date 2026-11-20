@@ -1,5 +1,5 @@
-import { AuthPrincipal,ROLES ,Role } from "./auth.types.js";
-import { isUuid } from "../common/validation/uuid.js"
+import { AuthPrincipal, ROLES, Role } from './auth.types.js';
+import { isUuid } from '../common/validation/uuid.js';
 
 function isRole(value: unknown): value is Role {
   return (

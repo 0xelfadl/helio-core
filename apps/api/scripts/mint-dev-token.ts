@@ -41,8 +41,10 @@ async function main(): Promise<void> {
       select: { id: true, orgId: true, role: true },
       take: 2,
     });
-    if (users.length === 0) throw new Error(`No user with email ${values.email}`);
-    if (users.length > 1) throw new Error(`Email ${values.email} exists in several orgs`);
+    if (users.length === 0)
+      throw new Error(`No user with email ${values.email}`);
+    if (users.length > 1)
+      throw new Error(`Email ${values.email} exists in several orgs`);
     const [user] = users;
 
     const jwt = new JwtService({ secret: requireEnv('JWT_SECRET') });

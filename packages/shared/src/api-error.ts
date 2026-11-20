@@ -1,8 +1,7 @@
 export interface ApiErrorBody {
-    error: {
-        code: string;
-        message: string;
-        details?: Record<string, unknown>;
-
-    };
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 }

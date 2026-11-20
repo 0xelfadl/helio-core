@@ -30,7 +30,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const isUnexpected =
       !(exception instanceof HttpException) ||
       status === HttpStatus.INTERNAL_SERVER_ERROR;
-      
 
     if (isUnexpected) {
       this.logger.error(
@@ -42,7 +41,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json(body);
   }
 
-  private toErrorResponse(exception: unknown): { status: number; body: ApiErrorBody } {
+  private toErrorResponse(exception: unknown): {
+    status: number;
+    body: ApiErrorBody;
+  } {
     const status =
       exception instanceof HttpException
         ? exception.getStatus()

@@ -24,7 +24,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-  
+
   api:
     build:
       context: .
@@ -39,7 +39,8 @@ services:
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health/ready"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health/ready"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -54,13 +55,13 @@ services:
 
   web:
     build:
-       context: .
-       dockerfile: apps/web/Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
-       api:
-          condition: service_healthy
+      api:
+        condition: service_healthy
 
   migrate:
     build:

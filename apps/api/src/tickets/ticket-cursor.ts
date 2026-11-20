@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { SortKey, ListTicketsQuery,  AssigneeFilter  } from './list-tickets.query.js';
+import type {
+  SortKey,
+  ListTicketsQuery,
+  AssigneeFilter,
+} from './list-tickets.query.js';
 import { isUuid } from '../common/validation/uuid.js';
 
 const CURSOR_VERSION = 1;
