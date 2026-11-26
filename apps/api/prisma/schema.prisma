@@ -1,7 +1,8 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -47,7 +48,7 @@ model Organization {
 
 model User {
   id        String   @id @default(uuid(7)) @db.Uuid
-  orgId     String   @db.Uuid @map("org_id")
+  orgId     String   @map("org_id") @db.Uuid
   name      String
   email     String
   role      UserRole
@@ -65,12 +66,12 @@ model User {
 
 model Ticket {
   id          String         @id @default(uuid(7)) @db.Uuid
-  orgId       String         @db.Uuid @map("org_id")
+  orgId       String         @map("org_id") @db.Uuid
   subject     String
   status      TicketStatus   @default(open)
   priority    TicketPriority @default(normal)
-  requesterId String         @db.Uuid @map("requester_id")
-  assigneeId  String?        @db.Uuid @map("assignee_id")
+  requesterId String         @map("requester_id") @db.Uuid
+  assigneeId  String?        @map("assignee_id") @db.Uuid
   createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -80,5 +81,8 @@ model Ticket {
   requester User  @relation("TicketRequester", fields: [requesterId], references: [id], onDelete: Restrict)
   assignee  User? @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
 
+  @@index([orgId, createdAt, id], map: "tickets_org_created_idx")
+  @@index([orgId, assigneeId, createdAt, id], map: "tickets_org_assignee_active_idx", where: raw("status = ANY (ARRAY['open'::ticket_status, 'pending'::ticket_status])"))
+  @@index([orgId, updatedAt, id], map: "tickets_org_updated_idx")
   @@map("tickets")
 }
